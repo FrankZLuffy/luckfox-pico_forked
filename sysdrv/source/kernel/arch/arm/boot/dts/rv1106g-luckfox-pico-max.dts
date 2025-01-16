@@ -12,6 +12,26 @@
 / {
 	model = "Luckfox Pico Max";
 	compatible = "rockchip,rv1103g-38x38-ipc-v10", "rockchip,rv1106g3";
+
+	// button_interrupt_0: button_interrupt_0 {
+    //     status = "okay";
+    //     compatible = "button_interrupt";
+    //     pinctrl-names = "default";
+    //     pinctrl-0 = <&can0_rx_int_pin>;
+    //     interrupt-parent = <&gpio1>;
+    //     interrupts = <RK_PD0 IRQ_TYPE_EDGE_BOTH>;
+    //     button-gpios = <&gpio1 RK_PD0 GPIO_ACTIVE_HIGH>;
+    // };
+	// button_interrupt_1: button_interrupt_1 {
+    //     status = "okay";
+    //     compatible = "button_interrupt";
+    //     pinctrl-names = "default";
+    //     pinctrl-0 = <&can1_rx_int_pin>;
+    //     interrupt-parent = <&gpio1>;
+    //     interrupts = <RK_PD1 IRQ_TYPE_EDGE_BOTH>;
+    //     button-gpios = <&gpio1 RK_PD1 GPIO_ACTIVE_HIGH>;
+    // };
+
 };
 
 /**********CRU**********/
@@ -89,13 +109,82 @@
 
 /**********SPI**********/
 &spi0 {
-	status = "disabled";
-	spidev@0 {
-		spi-max-frequency = <50000000>;
-	};
-  fbtft@0 {
-		spi-max-frequency = <50000000>;
-  };
+	status = "okay";
+	// cs-gpios = <0>,
+	// 		   <0>,
+	// 		   <&gpio1 RK_PC7 GPIO_ACTIVE_HIGH>;
+	num-cs = <2>;
+	// mcp2518fd0:mcp2518fd@0 {
+    // compatible = "Microchip,MCP2518FD,qiyun";
+	// 	spi-max-frequency = <50000000>;
+	// 	reg = <0>;
+	// 	status = "okay";
+	// 	pinctrl-names = "default";
+	// 	pinctrl-0 = <&can0_rx_int_pin>;
+	// 	interrupt-parent = <&gpio1>;
+    //     interrupts = <RK_PD0 IRQ_TYPE_LEVEL_LOW>;
+    //     microchip,rx-int = <&gpio1 RK_PD0 GPIO_ACTIVE_HIGH>;
+	// };
+	// mcp2518fd1:mcp2518fd@1 {
+    // compatible = "Microchip,MCP2518FD,qiyun";
+	// 	spi-max-frequency = <50000000>;
+	// 	reg = <1>;
+	// 	status = "okay";
+	// 	pinctrl-names = "default";
+	// 	pinctrl-0 = <&can1_rx_int_pin>;
+	// 	interrupt-parent = <&gpio1>;
+    //     interrupts = <RK_PD1 IRQ_TYPE_LEVEL_LOW>;
+    //     microchip,rx-int = <&gpio1 RK_PD1 GPIO_ACTIVE_HIGH>;
+	// };
+
+	can0:can@0 {
+		status = "okay";
+		compatible = "microchip,mcp2518fd";
+		reg = <0>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&can0_rx_int_pin>;
+		spi-max-frequency = <8000000>;
+		interrupt-parent = <&gpio1>;
+        interrupts = <RK_PD0 IRQ_TYPE_LEVEL_LOW>;
+        microchip,rx-int = <&gpio1 RK_PD0 GPIO_ACTIVE_HIGH>;
+	};	
+	can1:can@1 {
+		status = "okay";
+		compatible = "microchip,mcp2518fd";
+		reg = <1>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&can1_rx_int_pin>;
+		spi-max-frequency = <8000000>;
+		interrupt-parent = <&gpio1>;
+        interrupts = <RK_PD1 IRQ_TYPE_LEVEL_LOW>;
+        microchip,rx-int = <&gpio1 RK_PD1 GPIO_ACTIVE_HIGH>;
+	};	
+
+	// spidev@0 {
+    // compatible = "rockchip,spidev";
+	// 	spi-max-frequency = <50000000>;
+	// 	reg = <0>;
+	// status = "okay";
+	// };
+	// spidev@1 {
+    // compatible = "rockchip,spidev";
+	// 	spi-max-frequency = <50000000>;
+	// 	reg = <1>;
+	// status = "okay";
+	// };	
+	// spidev@2 {
+    // compatible = "rockchip,spidev";
+	// 	spi-max-frequency = <50000000>;
+	// 	reg = <2>;
+	// status = "okay";
+	// };	
+
+// 	spidev@0 {
+// 		spi-max-frequency = <50000000>;
+// 	};
+//   fbtft@0 {
+// 		spi-max-frequency = <50000000>;
+//   };
 };
 
 /**********I2C**********/
