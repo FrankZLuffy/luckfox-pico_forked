@@ -139,7 +139,7 @@
 
 	can0:can@0 {
 		status = "okay";
-		compatible = "microchip,mcp2518fd";
+		compatible = "microchip,mcp2518fd,qiyun";
 		reg = <0>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&can0_rx_int_pin>;
@@ -150,7 +150,7 @@
 	};	
 	can1:can@1 {
 		status = "okay";
-		compatible = "microchip,mcp2518fd";
+		compatible = "microchip,mcp2518fd,qiyun";
 		reg = <1>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&can1_rx_int_pin>;
