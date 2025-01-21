@@ -118,9 +118,9 @@
 #define MCP251XFD_REG_INT_RXIF BIT(1)
 #define MCP251XFD_REG_INT_TXIF BIT(0)
 /* These IRQ flags must be cleared by SW in the CAN_INT register */
-#define MCP251XFD_REG_INT_IF_CLEARABLE_MASK \
-	(MCP251XFD_REG_INT_IVMIF | MCP251XFD_REG_INT_WAKIF | \
-	 MCP251XFD_REG_INT_CERRIF |  MCP251XFD_REG_INT_SERRIF | \
+#define MCP251XFD_REG_INT_IF_CLEARABLE_MASK                                    \
+	(MCP251XFD_REG_INT_IVMIF | MCP251XFD_REG_INT_WAKIF |                   \
+	 MCP251XFD_REG_INT_CERRIF | MCP251XFD_REG_INT_SERRIF |                 \
 	 MCP251XFD_REG_INT_MODIF)
 
 #define MCP251XFD_REG_RXIF 0x20
@@ -160,13 +160,13 @@
 #define MCP251XFD_REG_BDIAG1_NACKERR BIT(18)
 #define MCP251XFD_REG_BDIAG1_NBIT1ERR BIT(17)
 #define MCP251XFD_REG_BDIAG1_NBIT0ERR BIT(16)
-#define MCP251XFD_REG_BDIAG1_BERR_MASK \
-	(MCP251XFD_REG_BDIAG1_DLCMM | MCP251XFD_REG_BDIAG1_ESI | \
-	 MCP251XFD_REG_BDIAG1_DCRCERR | MCP251XFD_REG_BDIAG1_DSTUFERR | \
-	 MCP251XFD_REG_BDIAG1_DFORMERR | MCP251XFD_REG_BDIAG1_DBIT1ERR | \
-	 MCP251XFD_REG_BDIAG1_DBIT0ERR | MCP251XFD_REG_BDIAG1_TXBOERR | \
-	 MCP251XFD_REG_BDIAG1_NCRCERR | MCP251XFD_REG_BDIAG1_NSTUFERR | \
-	 MCP251XFD_REG_BDIAG1_NFORMERR | MCP251XFD_REG_BDIAG1_NACKERR | \
+#define MCP251XFD_REG_BDIAG1_BERR_MASK                                         \
+	(MCP251XFD_REG_BDIAG1_DLCMM | MCP251XFD_REG_BDIAG1_ESI |               \
+	 MCP251XFD_REG_BDIAG1_DCRCERR | MCP251XFD_REG_BDIAG1_DSTUFERR |        \
+	 MCP251XFD_REG_BDIAG1_DFORMERR | MCP251XFD_REG_BDIAG1_DBIT1ERR |       \
+	 MCP251XFD_REG_BDIAG1_DBIT0ERR | MCP251XFD_REG_BDIAG1_TXBOERR |        \
+	 MCP251XFD_REG_BDIAG1_NCRCERR | MCP251XFD_REG_BDIAG1_NSTUFERR |        \
+	 MCP251XFD_REG_BDIAG1_NFORMERR | MCP251XFD_REG_BDIAG1_NACKERR |        \
 	 MCP251XFD_REG_BDIAG1_NBIT1ERR | MCP251XFD_REG_BDIAG1_NBIT0ERR)
 #define MCP251XFD_REG_BDIAG1_EFMSGCNT_MASK GENMASK(15, 0)
 
@@ -321,7 +321,7 @@
 #define MCP251XFD_REG_OSC_CLKODIV_1 0
 #define MCP251XFD_REG_OSC_CLKODIV_MASK GENMASK(6, 5)
 #define MCP251XFD_REG_OSC_SCLKDIV BIT(4)
-#define MCP251XFD_REG_OSC_LPMEN BIT(3)	/* MCP2518FD only */
+#define MCP251XFD_REG_OSC_LPMEN BIT(3) /* MCP2518FD only */
 #define MCP251XFD_REG_OSC_OSCDIS BIT(2)
 #define MCP251XFD_REG_OSC_PLLEN BIT(0)
 
@@ -359,7 +359,7 @@
 #define MCP251XFD_REG_ECCSTAT_DEDIF BIT(2)
 #define MCP251XFD_REG_ECCSTAT_SECIF BIT(1)
 
-#define MCP251XFD_REG_DEVID 0xe14	/* MCP2518FD only */
+#define MCP251XFD_REG_DEVID 0xe14 /* MCP2518FD only */
 #define MCP251XFD_REG_DEVID_ID_MASK GENMASK(7, 4)
 #define MCP251XFD_REG_DEVID_REV_MASK GENMASK(3, 0)
 
@@ -553,7 +553,7 @@ struct mcp251xfd_regs_status {
 enum mcp251xfd_model {
 	MCP251XFD_MODEL_MCP2517FD = 0x2517,
 	MCP251XFD_MODEL_MCP2518FD = 0x2518,
-	MCP251XFD_MODEL_MCP251XFD = 0xffff,	/* autodetect model */
+	MCP251XFD_MODEL_MCP251XFD = 0xffff, /* autodetect model */
 };
 
 struct mcp251xfd_devtype_data {
@@ -566,8 +566,8 @@ struct mcp251xfd_priv {
 	struct can_rx_offload offload;
 	struct net_device *ndev;
 
-	struct regmap *map_reg;			/* register access */
-	struct regmap *map_rx;			/* RX/TEF RAM access */
+	struct regmap *map_reg; /* register access */
+	struct regmap *map_rx; /* RX/TEF RAM access */
 
 	struct regmap *map_nocrc;
 	struct mcp251xfd_map_buf_nocrc *map_buf_nocrc_rx;
@@ -598,12 +598,13 @@ struct mcp251xfd_priv {
 	struct can_berr_counter bec;
 };
 
-#define MCP251XFD_IS(_model) \
-static inline bool \
-mcp251xfd_is_##_model(const struct mcp251xfd_priv *priv) \
-{ \
-	return priv->devtype_data.model == MCP251XFD_MODEL_MCP##_model##FD; \
-}
+#define MCP251XFD_IS(_model)                                                   \
+	static inline bool mcp251xfd_is_##_model(                              \
+		const struct mcp251xfd_priv *priv)                             \
+	{                                                                      \
+		return priv->devtype_data.model ==                             \
+		       MCP251XFD_MODEL_MCP##_model##FD;                        \
+	}
 
 MCP251XFD_IS(2517);
 MCP251XFD_IS(2518);
@@ -611,16 +612,14 @@ MCP251XFD_IS(251X);
 
 static inline u8 mcp251xfd_first_byte_set(u32 mask)
 {
-	return (mask & 0x0000ffff) ?
-		((mask & 0x000000ff) ? 0 : 1) :
-		((mask & 0x00ff0000) ? 2 : 3);
+	return (mask & 0x0000ffff) ? ((mask & 0x000000ff) ? 0 : 1) :
+				     ((mask & 0x00ff0000) ? 2 : 3);
 }
 
 static inline u8 mcp251xfd_last_byte_set(u32 mask)
 {
-	return (mask & 0xffff0000) ?
-		((mask & 0xff000000) ? 3 : 2) :
-		((mask & 0x0000ff00) ? 1 : 0);
+	return (mask & 0xffff0000) ? ((mask & 0xff000000) ? 3 : 2) :
+				     ((mask & 0x0000ff00) ? 1 : 0);
 }
 
 static inline __be16 mcp251xfd_cmd_reset(void)
@@ -628,14 +627,14 @@ static inline __be16 mcp251xfd_cmd_reset(void)
 	return cpu_to_be16(MCP251XFD_SPI_INSTRUCTION_RESET);
 }
 
-static inline void
-mcp251xfd_spi_cmd_read_nocrc(struct mcp251xfd_buf_cmd *cmd, u16 addr)
+static inline void mcp251xfd_spi_cmd_read_nocrc(struct mcp251xfd_buf_cmd *cmd,
+						u16 addr)
 {
 	cmd->cmd = cpu_to_be16(MCP251XFD_SPI_INSTRUCTION_READ | addr);
 }
 
-static inline void
-mcp251xfd_spi_cmd_write_nocrc(struct mcp251xfd_buf_cmd *cmd, u16 addr)
+static inline void mcp251xfd_spi_cmd_write_nocrc(struct mcp251xfd_buf_cmd *cmd,
+						 u16 addr)
 {
 	cmd->cmd = cpu_to_be16(MCP251XFD_SPI_INSTRUCTION_WRITE | addr);
 }
@@ -650,8 +649,8 @@ static inline bool mcp251xfd_reg_in_ram(unsigned int reg)
 }
 
 static inline void
-__mcp251xfd_spi_cmd_crc_set_len(struct mcp251xfd_buf_cmd_crc *cmd,
-				u16 len, bool in_ram)
+__mcp251xfd_spi_cmd_crc_set_len(struct mcp251xfd_buf_cmd_crc *cmd, u16 len,
+				bool in_ram)
 {
 	/* Number of u32 for RAM access, number of u8 otherwise. */
 	if (in_ram)
@@ -678,9 +677,8 @@ mcp251xfd_spi_cmd_read_crc_set_addr(struct mcp251xfd_buf_cmd_crc *cmd, u16 addr)
 	cmd->cmd = cpu_to_be16(MCP251XFD_SPI_INSTRUCTION_READ_CRC | addr);
 }
 
-static inline void
-mcp251xfd_spi_cmd_read_crc(struct mcp251xfd_buf_cmd_crc *cmd,
-			   u16 addr, u16 len)
+static inline void mcp251xfd_spi_cmd_read_crc(struct mcp251xfd_buf_cmd_crc *cmd,
+					      u16 addr, u16 len)
 {
 	mcp251xfd_spi_cmd_read_crc_set_addr(cmd, addr);
 	__mcp251xfd_spi_cmd_crc_set_len(cmd, len, mcp251xfd_reg_in_ram(addr));
@@ -694,8 +692,8 @@ mcp251xfd_spi_cmd_write_crc_set_addr(struct mcp251xfd_buf_cmd_crc *cmd,
 }
 
 static inline void
-mcp251xfd_spi_cmd_write_crc(struct mcp251xfd_buf_cmd_crc *cmd,
-			    u16 addr, u16 len)
+mcp251xfd_spi_cmd_write_crc(struct mcp251xfd_buf_cmd_crc *cmd, u16 addr,
+			    u16 len)
 {
 	mcp251xfd_spi_cmd_write_crc_set_addr(cmd, addr);
 	__mcp251xfd_spi_cmd_crc_set_len(cmd, len, mcp251xfd_reg_in_ram(addr));
@@ -703,8 +701,7 @@ mcp251xfd_spi_cmd_write_crc(struct mcp251xfd_buf_cmd_crc *cmd,
 
 static inline u8 *
 mcp251xfd_spi_cmd_write(const struct mcp251xfd_priv *priv,
-			union mcp251xfd_write_reg_buf *write_reg_buf,
-			u16 addr)
+			union mcp251xfd_write_reg_buf *write_reg_buf, u16 addr)
 {
 	u8 *data;
 
@@ -713,8 +710,7 @@ mcp251xfd_spi_cmd_write(const struct mcp251xfd_priv *priv,
 						     addr);
 		data = write_reg_buf->crc.data;
 	} else {
-		mcp251xfd_spi_cmd_write_nocrc(&write_reg_buf->nocrc.cmd,
-					      addr);
+		mcp251xfd_spi_cmd_write_nocrc(&write_reg_buf->nocrc.cmd, addr);
 		data = write_reg_buf->nocrc.data;
 	}
 
@@ -723,8 +719,7 @@ mcp251xfd_spi_cmd_write(const struct mcp251xfd_priv *priv,
 
 static inline u16 mcp251xfd_get_tef_obj_addr(u8 n)
 {
-	return MCP251XFD_RAM_START +
-		sizeof(struct mcp251xfd_hw_tef_obj) * n;
+	return MCP251XFD_RAM_START + sizeof(struct mcp251xfd_hw_tef_obj) * n;
 }
 
 static inline u16
@@ -787,7 +782,7 @@ mcp251xfd_get_tx_nr_by_addr(const struct mcp251xfd_tx_ring *tx_ring, u8 *nr,
 		return -ENOENT;
 
 	*nr = (addr - mcp251xfd_get_tx_obj_addr(tx_ring, 0)) /
-		tx_ring->obj_size;
+	      tx_ring->obj_size;
 
 	return 0;
 }
@@ -817,19 +812,17 @@ mcp251xfd_get_rx_linear_len(const struct mcp251xfd_rx_ring *ring)
 	return min_t(u8, len, ring->obj_num - mcp251xfd_get_rx_tail(ring));
 }
 
-#define mcp251xfd_for_each_tx_obj(ring, _obj, n) \
-	for ((n) = 0, (_obj) = &(ring)->obj[(n)]; \
-	     (n) < (ring)->obj_num; \
+#define mcp251xfd_for_each_tx_obj(ring, _obj, n)                               \
+	for ((n) = 0, (_obj) = &(ring)->obj[(n)]; (n) < (ring)->obj_num;       \
 	     (n)++, (_obj) = &(ring)->obj[(n)])
 
-#define mcp251xfd_for_each_rx_ring(priv, ring, n) \
-	for ((n) = 0, (ring) = *((priv)->rx + (n)); \
-	     (n) < (priv)->rx_ring_num; \
+#define mcp251xfd_for_each_rx_ring(priv, ring, n)                              \
+	for ((n) = 0, (ring) = *((priv)->rx + (n)); (n) < (priv)->rx_ring_num; \
 	     (n)++, (ring) = *((priv)->rx + (n)))
 
 int mcp251xfd_regmap_init(struct mcp251xfd_priv *priv);
-u16 mcp251xfd_crc16_compute2(const void *cmd, size_t cmd_size,
-			     const void *data, size_t data_size);
+u16 mcp251xfd_crc16_compute2(const void *cmd, size_t cmd_size, const void *data,
+			     size_t data_size);
 u16 mcp251xfd_crc16_compute(const void *data, size_t data_size);
 
 #endif
