@@ -117,49 +117,55 @@ static const char *mcp251xfd_get_mode_str(const u8 mode)
 
 static inline int mcp251xfd_vdd_enable(const struct mcp251xfd_priv *priv)
 {
-	if (!priv->reg_vdd)
-		return 0;
+	// if (!priv->reg_vdd)
+	// 	return 0;
 
-	return regulator_enable(priv->reg_vdd);
+	// return regulator_enable(priv->reg_vdd);
+	// 不需要vdd
+	return 0;
 }
 
 static inline int mcp251xfd_vdd_disable(const struct mcp251xfd_priv *priv)
 {
-	if (!priv->reg_vdd)
-		return 0;
+	// if (!priv->reg_vdd)
+	// 	return 0;
 
-	return regulator_disable(priv->reg_vdd);
+	// return regulator_disable(priv->reg_vdd);
+	// 不需要vdd
+	return 0;
 }
 
 static inline int
 mcp251xfd_transceiver_enable(const struct mcp251xfd_priv *priv)
 {
-	if (!priv->reg_xceiver)
-		return 0;
+	// if (!priv->reg_xceiver)
+	// 	return 0;
 
-	return regulator_enable(priv->reg_xceiver);
+	// return regulator_enable(priv->reg_xceiver);
+	return 0;
 }
 
 static inline int
 mcp251xfd_transceiver_disable(const struct mcp251xfd_priv *priv)
 {
-	if (!priv->reg_xceiver)
-		return 0;
+	// if (!priv->reg_xceiver)
+	// 	return 0;
 
-	return regulator_disable(priv->reg_xceiver);
+	// return regulator_disable(priv->reg_xceiver);
+	return 0;
 }
 
 static int mcp251xfd_clks_and_vdd_enable(const struct mcp251xfd_priv *priv)
 {
 	int err;
-
-	err = clk_prepare_enable(priv->clk);
-	if (err)
-		return err;
+	// 不需要clk
+	// err = clk_prepare_enable(priv->clk);
+	// if (err)
+	// 	return err;
 
 	err = mcp251xfd_vdd_enable(priv);
-	if (err)
-		clk_disable_unprepare(priv->clk);
+	// if (err)
+	// 	clk_disable_unprepare(priv->clk);
 
 	/* Wait for oscillator stabilisation time after power up */
 	usleep_range(MCP251XFD_OSC_STAB_SLEEP_US,
@@ -176,7 +182,7 @@ static int mcp251xfd_clks_and_vdd_disable(const struct mcp251xfd_priv *priv)
 	if (err)
 		return err;
 
-	clk_disable_unprepare(priv->clk);
+	// clk_disable_unprepare(priv->clk);
 
 	return 0;
 }
@@ -319,6 +325,7 @@ static void mcp251xfd_tx_ring_init_tx_obj(const struct mcp251xfd_priv *priv,
 					ARRAY_SIZE(tx_obj->xfer));
 }
 
+// 这个只是配置了TX，然后RX只是计算了FIFO的地址
 static void mcp251xfd_ring_init(struct mcp251xfd_priv *priv)
 {
 	struct mcp251xfd_tx_ring *tx_ring;
@@ -779,6 +786,7 @@ static int mcp251xfd_chip_rx_int_disable(const struct mcp251xfd_priv *priv)
 	return regmap_write(priv->map_reg, MCP251XFD_REG_IOCON, val);
 }
 
+// 设置接收缓冲区的大小，溢出中断和非空中断，报文数据长度
 static int mcp251xfd_chip_rx_fifo_init_one(const struct mcp251xfd_priv *priv,
 					   const struct mcp251xfd_rx_ring *ring)
 {
@@ -790,11 +798,13 @@ static int mcp251xfd_chip_rx_fifo_init_one(const struct mcp251xfd_priv *priv,
 	 * generate a RXOVIF, use this to properly detect RX MAB
 	 * overflows.
 	 */
+	// 配置长度，溢出中断和非空中断
 	fifo_con = FIELD_PREP(MCP251XFD_REG_FIFOCON_FSIZE_MASK,
 			      ring->obj_num - 1) |
 		   MCP251XFD_REG_FIFOCON_RXTSEN | MCP251XFD_REG_FIFOCON_RXOVIE |
 		   MCP251XFD_REG_FIFOCON_TFNRFNIE;
 
+	// 监听模式或者FD模式，payload设置为64位，否则设置为8位
 	if (priv->can.ctrlmode & (CAN_CTRLMODE_LISTENONLY | CAN_CTRLMODE_FD))
 		fifo_con |= FIELD_PREP(MCP251XFD_REG_FIFOCON_PLSIZE_MASK,
 				       MCP251XFD_REG_FIFOCON_PLSIZE_64);
@@ -806,6 +816,7 @@ static int mcp251xfd_chip_rx_fifo_init_one(const struct mcp251xfd_priv *priv,
 			    fifo_con);
 }
 
+// 设置接收过滤器
 static int
 mcp251xfd_chip_rx_filter_init_one(const struct mcp251xfd_priv *priv,
 				  const struct mcp251xfd_rx_ring *ring)
@@ -829,6 +840,7 @@ static int mcp251xfd_chip_fifo_init(const struct mcp251xfd_priv *priv)
 	int err, n;
 
 	/* TEF */
+	// 大小、带时间戳、溢出中断、非空中断
 	val = FIELD_PREP(MCP251XFD_REG_TEFCON_FSIZE_MASK,
 			 tx_ring->obj_num - 1) |
 	      MCP251XFD_REG_TEFCON_TEFTSEN | MCP251XFD_REG_TEFCON_TEFOVIE |
@@ -839,10 +851,12 @@ static int mcp251xfd_chip_fifo_init(const struct mcp251xfd_priv *priv)
 		return err;
 
 	/* FIFO 1 - TX */
+	// 大小、发送FIFO、超过最大尝试次数允许发出中断
 	val = FIELD_PREP(MCP251XFD_REG_FIFOCON_FSIZE_MASK,
 			 tx_ring->obj_num - 1) |
 	      MCP251XFD_REG_FIFOCON_TXEN | MCP251XFD_REG_FIFOCON_TXATIE;
 
+	// 如果处于监听模式或者FD模式，报文数据长度为64，否则为8
 	if (priv->can.ctrlmode & (CAN_CTRLMODE_LISTENONLY | CAN_CTRLMODE_FD))
 		val |= FIELD_PREP(MCP251XFD_REG_FIFOCON_PLSIZE_MASK,
 				  MCP251XFD_REG_FIFOCON_PLSIZE_64);
@@ -850,6 +864,7 @@ static int mcp251xfd_chip_fifo_init(const struct mcp251xfd_priv *priv)
 		val |= FIELD_PREP(MCP251XFD_REG_FIFOCON_PLSIZE_MASK,
 				  MCP251XFD_REG_FIFOCON_PLSIZE_8);
 
+	// 如果ctlmode为一次发送，则不尝试发送；否则，无限重试
 	if (priv->can.ctrlmode & CAN_CTRLMODE_ONE_SHOT)
 		val |= FIELD_PREP(MCP251XFD_REG_FIFOCON_TXAT_MASK,
 				  MCP251XFD_REG_FIFOCON_TXAT_ONE_SHOT);
@@ -863,6 +878,7 @@ static int mcp251xfd_chip_fifo_init(const struct mcp251xfd_priv *priv)
 		return err;
 
 	/* RX FIFOs */
+	// 设置RX FIFO和过滤器
 	mcp251xfd_for_each_rx_ring(priv, rx_ring, n)
 	{
 		err = mcp251xfd_chip_rx_fifo_init_one(priv, rx_ring);
@@ -2175,6 +2191,7 @@ out_fail:
 	return handled;
 }
 
+// 下一个发送tx_obj的地址
 static inline struct mcp251xfd_tx_obj *
 mcp251xfd_get_tx_obj_next(struct mcp251xfd_tx_ring *tx_ring)
 {
@@ -2275,6 +2292,7 @@ static void mcp251xfd_tx_obj_from_skb(const struct mcp251xfd_priv *priv,
 	tx_obj->xfer[0].len = len;
 }
 
+// 直接要把发送的tx_obj异步传输
 static int mcp251xfd_tx_obj_write(const struct mcp251xfd_priv *priv,
 				  struct mcp251xfd_tx_obj *tx_obj)
 {
@@ -2326,6 +2344,7 @@ static netdev_tx_t mcp251xfd_start_xmit(struct sk_buff *skb,
 	mcp251xfd_tx_obj_from_skb(priv, tx_obj, skb, tx_ring->head);
 
 	/* Stop queue if we occupy the complete TX FIFO */
+	// 把头指针加1
 	tx_head = mcp251xfd_get_tx_head(tx_ring);
 	tx_ring->head++;
 	if (tx_ring->head - tx_ring->tail >= tx_ring->obj_num)
@@ -2709,10 +2728,12 @@ static int mcp251xfd_probe(struct spi_device *spi)
 	struct net_device *ndev;
 	struct mcp251xfd_priv *priv;
 	struct gpio_desc *rx_int;
-	struct regulator *reg_vdd, *reg_xceiver;
-	struct clk *clk;
+	// 这里的电源和osc都是不需要的
+	// struct regulator *reg_vdd, *reg_xceiver;
+	// struct clk *clk;
 	u32 freq;
 	int err;
+	freq = 20 * 1000 * 1000; // 用的外部晶振，20MHZ
 
 	if (!spi->irq)
 		return dev_err_probe(
@@ -2726,28 +2747,31 @@ static int mcp251xfd_probe(struct spi_device *spi)
 	else if (IS_ERR(rx_int))
 		return PTR_ERR(rx_int);
 
-	reg_vdd = devm_regulator_get_optional(&spi->dev, "vdd");
-	if (PTR_ERR(reg_vdd) == -EPROBE_DEFER)
-		return -EPROBE_DEFER;
-	else if (PTR_ERR(reg_vdd) == -ENODEV)
-		reg_vdd = NULL;
-	else if (IS_ERR(reg_vdd))
-		return PTR_ERR(reg_vdd);
+	// vdd 不需要，而且只是简单的获取资源，做判断。
+	// reg_vdd = devm_regulator_get_optional(&spi->dev, "vdd");
+	// if (PTR_ERR(reg_vdd) == -EPROBE_DEFER)
+	// 	return -EPROBE_DEFER;
+	// else if (PTR_ERR(reg_vdd) == -ENODEV)
+	// 	reg_vdd = NULL;
+	// else if (IS_ERR(reg_vdd))
+	// 	return PTR_ERR(reg_vdd);
 
-	reg_xceiver = devm_regulator_get_optional(&spi->dev, "xceiver");
-	if (PTR_ERR(reg_xceiver) == -EPROBE_DEFER)
-		return -EPROBE_DEFER;
-	else if (PTR_ERR(reg_xceiver) == -ENODEV)
-		reg_xceiver = NULL;
-	else if (IS_ERR(reg_xceiver))
-		return PTR_ERR(reg_xceiver);
+	// xceiver 不需要，而且只是简单的获取资源，做判断。
+	// reg_xceiver = devm_regulator_get_optional(&spi->dev, "xceiver");
+	// if (PTR_ERR(reg_xceiver) == -EPROBE_DEFER)
+	// 	return -EPROBE_DEFER;
+	// else if (PTR_ERR(reg_xceiver) == -ENODEV)
+	// 	reg_xceiver = NULL;
+	// else if (IS_ERR(reg_xceiver))
+	// 	return PTR_ERR(reg_xceiver);
 
-	clk = devm_clk_get(&spi->dev, NULL);
-	if (IS_ERR(clk)) {
-		dev_err(&spi->dev, "No Oscillator (clock) defined.\n");
-		return PTR_ERR(clk);
-	}
-	freq = clk_get_rate(clk);
+	// clk 不需要，而且只是简单的获取资源，做判断。
+	// clk = devm_clk_get(&spi->dev, NULL);
+	// if (IS_ERR(clk)) {
+	// 	dev_err(&spi->dev, "No Oscillator (clock) defined.\n");
+	// 	return PTR_ERR(clk);
+	// }
+	// freq = clk_get_rate(clk);
 
 	/* Sanity check */
 	if (freq < MCP251XFD_SYSCLOCK_HZ_MIN ||
@@ -2781,7 +2805,9 @@ static int mcp251xfd_probe(struct spi_device *spi)
 	priv->can.clock.freq = freq;
 	priv->can.do_set_mode = mcp251xfd_set_mode;
 	priv->can.do_get_berr_counter = mcp251xfd_get_berr_counter;
+	// 下面是一个结构体，没变。寄存器3-8： CiNBTCFG ——标称位时间配置寄存器
 	priv->can.bittiming_const = &mcp251xfd_bittiming_const;
+	// 下面是一个结构体，没变。寄存器3-9： CiDBTCFG ——数据位时间配置寄存器
 	priv->can.data_bittiming_const = &mcp251xfd_data_bittiming_const;
 	priv->can.ctrlmode_supported =
 		CAN_CTRLMODE_LISTENONLY | CAN_CTRLMODE_BERR_REPORTING |
@@ -2789,9 +2815,9 @@ static int mcp251xfd_probe(struct spi_device *spi)
 	priv->ndev = ndev;
 	priv->spi = spi;
 	priv->rx_int = rx_int;
-	priv->clk = clk;
-	priv->reg_vdd = reg_vdd;
-	priv->reg_xceiver = reg_xceiver;
+	// priv->clk = clk;
+	// priv->reg_vdd = reg_vdd;
+	// priv->reg_xceiver = reg_xceiver;
 
 	match = device_get_match_data(&spi->dev);
 	if (match)
@@ -2833,10 +2859,13 @@ static int mcp251xfd_probe(struct spi_device *spi)
 	spi->max_speed_hz = min(spi->max_speed_hz, freq / 2 / 1000 * 850);
 	spi->bits_per_word = 8;
 	spi->rt = true;
+
 	err = spi_setup(spi);
 	if (err)
 		goto out_free_candev;
 
+	// 寄存器到内存的映射。
+	// 已经读写过寄存器，这块没有问题
 	err = mcp251xfd_regmap_init(priv);
 	if (err)
 		goto out_free_candev;

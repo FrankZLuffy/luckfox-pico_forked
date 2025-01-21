@@ -393,13 +393,23 @@ static const struct regmap_config mcp251xfd_regmap_crc = {
 	.cache_type = REGCACHE_NONE,
 };
 
+/*
+定义 读写等操作。
+*/
 static const struct regmap_bus mcp251xfd_bus_crc = {
 	.write = mcp251xfd_regmap_crc_write,
+	// 用于批量写多个寄存器数据，可能涉及到一个连续的数据块或多个寄存器的写入操作；
+	// mcp251xfd_regmap_crc_write这个实际上调用了mcp251xfd_regmap_crc_gather_write；
 	.gather_write = mcp251xfd_regmap_crc_gather_write,
+	// 定义了如何从 MCP251XFD CRC 寄存器读取数据;
 	.read = mcp251xfd_regmap_crc_read,
+	// 该字段定义了寄存器地址的字节序（endian）;这里本地处理器的字节序
 	.reg_format_endian_default = REGMAP_ENDIAN_NATIVE,
+	// 该字段定义了寄存器值的数据字节序（endian）;这里是小端模式
 	.val_format_endian_default = REGMAP_ENDIAN_LITTLE,
+	// 定义一次原始读取（raw read）操作可以读取的最大字节数;
 	.max_raw_read = sizeof_field(struct mcp251xfd_map_buf_crc, data),
+	// 定义一次原始写入（raw write）操作可以写入的最大字节数;
 	.max_raw_write = sizeof_field(struct mcp251xfd_map_buf_crc, data),
 };
 
@@ -467,11 +477,16 @@ static void mcp251xfd_regmap_destroy_nocrc(struct mcp251xfd_priv *priv)
 	}
 }
 
+/*
+将crc、crc_rx、crc_tx映射到内存中。
+*/
 static int mcp251xfd_regmap_init_crc(struct mcp251xfd_priv *priv)
 {
 	if (!priv->map_crc) {
 		struct regmap *map;
-
+		
+		// mcp251xfd_bus_crc：描述 CRC 相关的总线操作的结构体（它定义了如何通过 SPI 与 MCP251XFD 进行通信）
+		// mcp251xfd_regmap_crc：如何操作寄存器的配置信息，例如寄存器的地址、数据宽度等。
 		map = devm_regmap_init(&priv->spi->dev, &mcp251xfd_bus_crc,
 				       priv->spi, &mcp251xfd_regmap_crc);
 		if (IS_ERR(map))
@@ -517,6 +532,7 @@ static void mcp251xfd_regmap_destroy_crc(struct mcp251xfd_priv *priv)
 	}
 }
 
+// 寄存器到内存的映射。
 int mcp251xfd_regmap_init(struct mcp251xfd_priv *priv)
 {
 	int err;
